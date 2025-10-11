@@ -1,0 +1,108 @@
+{
+  "apt_groups": {
+    "APT36_Transparent_Tribe": {
+      "origin": "Pakistan",
+      "active_since": "2013",
+      "targets": ["Indian Defense", "Government", "Education"],
+      "techniques": ["Spear-phishing", "Credential harvesting", "RAT deployment"],
+      "malware_families": ["Crimson RAT", "CapraRAT", "HTTPS"],
+      "recent_campaigns": [
+        {
+          "name": "Operation C-Major",
+          "date": "2024-08",
+          "targets": "Indian Armed Forces",
+          "iocs": {
+            "domains": ["indian-gov-portal[.]tk", "defense-update[.]ml"],
+            "ips": ["203.0.113.100", "203.0.113.101"],
+            "hashes": ["5d41402abc4b2a76b9719d911017c592"]
+          }
+        }
+      ]
+    },
+    "SideCopy": {
+      "origin": "Pakistan", 
+      "active_since": "2019",
+      "targets": ["Indian Military", "Government"],
+      "techniques": ["Spear-phishing", "Social engineering", "RAT deployment"],
+      "malware_families": ["Allakore RAT", "ATTA RAT", "ReverseRAT"],
+      "recent_campaigns": [
+        {
+          "name": "Operation Ghazi",
+          "date": "2024-09",
+          "targets": "Indian Government Officials",
+          "iocs": {
+            "domains": ["govt-portal[.]ga", "official-update[.]cf"],
+            "ips": ["198.51.100.200", "198.51.100.201"],
+            "hashes": ["098f6bcd4621d373cade4e832627b4f6"]
+          }
+        }
+      ]
+    },
+    "APT41": {
+      "origin": "China",
+      "active_since": "2012", 
+      "targets": ["Healthcare", "Telecom", "Government", "Financial"],
+      "techniques": ["Supply chain attacks", "Zero-day exploits", "Living off the land"],
+      "malware_families": ["MESSAGETAP", "HIGHNOON", "LOWKEY"],
+      "recent_campaigns": [
+        {
+          "name": "Operation Jacana",
+          "date": "2024-10",
+          "targets": "Indian Telecom Infrastructure",
+          "iocs": {
+            "domains": ["telecom-update[.]com", "network-security[.]org"],
+            "ips": ["233.252.0.100", "233.252.0.101"],
+            "hashes": ["ad0234829205b9033196ba818f7a872b"]
+          }
+        }
+      ]
+    }
+  },
+  "targeted_sectors": [
+    {
+      "sector": "Government",
+      "risk_level": "CRITICAL",
+      "attack_frequency": "Daily",
+      "common_vectors": ["Email phishing", "Watering hole", "Supply chain"],
+      "recent_incidents": 156
+    },
+    {
+      "sector": "Defense",
+      "risk_level": "CRITICAL", 
+      "attack_frequency": "Daily",
+      "common_vectors": ["Spear phishing", "USB attacks", "Insider threats"],
+      "recent_incidents": 89
+    },
+    {
+      "sector": "Banking",
+      "risk_level": "HIGH",
+      "attack_frequency": "Multiple daily",
+      "common_vectors": ["Ransomware", "BEC", "ATM malware"],
+      "recent_incidents": 234
+    },
+    {
+      "sector": "Healthcare",
+      "risk_level": "HIGH",
+      "attack_frequency": "Weekly",
+      "common_vectors": ["Ransomware", "Data theft", "Medical device hacking"],
+      "recent_incidents": 67
+    }
+  ],
+  "geographic_distribution": {
+    "attack_origins": {
+      "Pakistan": 45.2,
+      "China": 28.7,
+      "Russia": 12.3,
+      "North Korea": 8.1,
+      "Others": 5.7
+    },
+    "indian_targets_by_state": {
+      "Delhi": 89,
+      "Maharashtra": 67,
+      "Karnataka": 45,
+      "Tamil Nadu": 34,
+      "West Bengal": 23,
+      "Others": 89
+    }
+  }
+}

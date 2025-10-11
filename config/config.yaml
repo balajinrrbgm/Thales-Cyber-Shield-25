@@ -1,0 +1,80 @@
+# Thales Cyber Shield Configuration
+
+app:
+  name: "Thales Cyber Shield"
+  version: "1.0.0"
+  debug: false
+  host: "0.0.0.0"
+  port: 8000
+
+database:
+  url: "postgresql://thales_user:thales_password@localhost:5432/thales_cyber_shield"
+  pool_size: 20
+  max_overflow: 30
+
+redis:
+  url: "redis://localhost:6379/0"
+  max_connections: 50
+
+security:
+  secret_key: "your-secret-key-here"
+  algorithm: "HS256"
+  token_expire_minutes: 30
+  rate_limit:
+    requests_per_minute: 100
+
+ai_models:
+  model_path: "./models"
+  threat_detector:
+    name: "threat_detector_v1.0"
+    threshold: 0.7
+  anomaly_detector:
+    name: "anomaly_detector_v1.0"
+    threshold: 0.5
+
+threat_intelligence:
+  update_interval_minutes: 5
+  sources:
+    cert_in:
+      enabled: true
+      api_key: "your-cert-in-api-key"
+    virustotal:
+      enabled: true
+      api_key: "your-virustotal-api-key"
+    abuse_ch:
+      enabled: true
+    internal:
+      enabled: true
+
+cloud:
+  aws:
+    access_key_id: "your-aws-key"
+    secret_access_key: "your-aws-secret"
+    region: "ap-south-1"  # Mumbai region for Indian deployment
+  azure:
+    client_id: "your-azure-client-id"
+    client_secret: "your-azure-secret"
+    tenant_id: "your-azure-tenant"
+  gcp:
+    project_id: "your-gcp-project"
+    credentials_file: "path/to/gcp-credentials.json"
+
+monitoring:
+  prometheus:
+    enabled: true
+    port: 9090
+  grafana:
+    enabled: true
+    port: 3001
+  log_level: "INFO"
+
+features:
+  multi_language:
+    enabled: true
+    supported_languages: ["en", "hi", "bn", "te", "mr", "ta", "gu", "kn", "ml", "or", "pa", "as"]
+    google_translate_api_key: "your-google-translate-key"
+
+  indian_compliance:
+    dpdp_act: true
+    cert_in_integration: true
+    localized_reporting: true

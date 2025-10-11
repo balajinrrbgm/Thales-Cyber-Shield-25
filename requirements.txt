@@ -1,0 +1,74 @@
+# Core Dependencies
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+python-multipart==0.0.6
+
+# AI/ML Libraries
+torch==2.1.0
+torchvision==0.16.0
+transformers==4.35.2
+scikit-learn==1.3.2
+numpy==1.24.3
+pandas==2.0.3
+matplotlib==3.7.2
+seaborn==0.12.2
+
+# Data Processing
+kafka-python==2.0.2
+redis==5.0.1
+celery==5.3.4
+psycopg2-binary==2.9.9
+
+# Security Libraries
+cryptography==41.0.7
+bcrypt==4.1.2
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# Web Framework
+starlette==0.27.0
+jinja2==3.1.2
+aiofiles==23.2.1
+
+# Database
+sqlalchemy==2.0.23
+alembic==1.13.1
+
+# Monitoring & Logging
+prometheus-client==0.19.0
+structlog==23.2.0
+
+# Cloud & Infrastructure
+boto3==1.34.0
+azure-storage-blob==12.19.0
+google-cloud-storage==2.10.0
+
+# Network Security
+scapy==2.5.0
+pyshark==0.6.0
+
+# NLP for Multi-language Support
+spacy==3.7.2
+googletrans==3.1.0-alpha
+langdetect==1.0.9
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+httpx==0.25.2
+
+# Development
+black==23.11.0
+flake8==6.1.0
+mypy==1.7.1
+pre-commit==3.6.0
+
+# Configuration
+pyyaml==6.0.1
+python-dotenv==1.0.0
+
+# Deployment
+docker==6.1.3
+kubernetes==28.1.0

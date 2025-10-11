@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: thales-config
+  namespace: thales-cyber-shield
+data:
+  config.yaml: |
+    app:
+      name: "Thales Cyber Shield"
+      version: "1.0.0"
+      debug: false
+
+    ai_models:
+      threat_detector:
+        threshold: 0.7
+      anomaly_detector:
+        threshold: 0.5
+
+    threat_intelligence:
+      update_interval_minutes: 5
+
+    features:
+      multi_language:
+        enabled: true
+        supported_languages: ["en", "hi", "bn", "te", "mr", "ta", "gu", "kn", "ml"]
