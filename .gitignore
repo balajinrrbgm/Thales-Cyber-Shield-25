@@ -11,6 +11,9 @@ node_modules/
 .env.production.local
 .env*.local
 
+# Config File
+/config/config.yaml
+
 # Build outputs
 /build/
 /dist/
