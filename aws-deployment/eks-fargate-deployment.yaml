@@ -1,0 +1,312 @@
+# AWS EKS Fargate Deployment for Thales Cyber Shield
+# Optimized for minimum cost with high efficiency
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: thales-cyber-shield
+  labels:
+    name: thales-cyber-shield
+    environment: production
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: thales-config
+  namespace: thales-cyber-shield
+data:
+  DATABASE_URL: "postgresql+asyncpg://thales:shield123@thales-db-service:5432/cybershield"
+  REDIS_URL: "redis://thales-redis-service:6379"
+  API_VERSION: "v1"
+  LOG_LEVEL: "INFO"
+  CORS_ORIGINS: "https://your-domain.com"
+  JWT_SECRET_KEY: "your-super-secret-key-change-in-production"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: thales-secrets
+  namespace: thales-cyber-shield
+type: Opaque
+data:
+  # Base64 encoded values (echo -n 'value' | base64)
+  postgres-password: c2hpZWxkMTIz  # shield123
+  jwt-secret: eW91ci1zdXBlci1zZWNyZXQta2V5  # your-super-secret-key
+---
+# Database Service (Cost-optimized single instance)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thales-db
+  namespace: thales-cyber-shield
+  labels:
+    app: thales-db
+spec:
+  replicas: 1  # Single instance for cost optimization
+  selector:
+    matchLabels:
+      app: thales-db
+  template:
+    metadata:
+      labels:
+        app: thales-db
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:13-alpine  # Lightweight Alpine version
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        env:
+        - name: POSTGRES_DB
+          value: "cybershield"
+        - name: POSTGRES_USER
+          value: "thales"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: thales-secrets
+              key: postgres-password
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: thales-cyber-shield
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi  # Minimal storage for cost optimization
+  storageClassName: gp3  # GP3 is most cost-effective
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: thales-db-service
+  namespace: thales-cyber-shield
+spec:
+  selector:
+    app: thales-db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+---
+# Backend API Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thales-backend
+  namespace: thales-cyber-shield
+  labels:
+    app: thales-backend
+spec:
+  replicas: 2  # Minimal replicas for availability
+  selector:
+    matchLabels:
+      app: thales-backend
+  template:
+    metadata:
+      labels:
+        app: thales-backend
+    spec:
+      containers:
+      - name: thales-api
+        image: your-ecr-repo/thales-cyber-shield:latest
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: thales-config
+              key: DATABASE_URL
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: thales-secrets
+              key: jwt-secret
+        ports:
+        - containerPort: 8000
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: thales-backend-service
+  namespace: thales-cyber-shield
+spec:
+  selector:
+    app: thales-backend
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+---
+# Frontend Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thales-frontend
+  namespace: thales-cyber-shield
+  labels:
+    app: thales-frontend
+spec:
+  replicas: 2  # Minimal replicas for availability
+  selector:
+    matchLabels:
+      app: thales-frontend
+  template:
+    metadata:
+      labels:
+        app: thales-frontend
+    spec:
+      containers:
+      - name: thales-web
+        image: your-ecr-repo/thales-frontend:latest
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        ports:
+        - containerPort: 3000
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: thales-frontend-service
+  namespace: thales-cyber-shield
+spec:
+  selector:
+    app: thales-frontend
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+---
+# Application Load Balancer
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: thales-ingress
+  namespace: thales-cyber-shield
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:YOUR-ACCOUNT:certificate/YOUR-CERT-ID
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+spec:
+  rules:
+  - host: thales-cyber-shield.your-domain.com
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: thales-backend-service
+            port:
+              number: 8000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: thales-frontend-service
+            port:
+              number: 3000
+---
+# Horizontal Pod Autoscaler for Backend (Cost-aware)
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: thales-backend-hpa
+  namespace: thales-cyber-shield
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: thales-backend
+  minReplicas: 1  # Minimum for cost optimization
+  maxReplicas: 5  # Maximum limit to control costs
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+---
+# Horizontal Pod Autoscaler for Frontend
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: thales-frontend-hpa
+  namespace: thales-cyber-shield
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: thales-frontend
+  minReplicas: 1  # Minimum for cost optimization
+  maxReplicas: 3  # Frontend needs less scaling
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70

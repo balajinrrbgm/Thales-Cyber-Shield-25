@@ -1,565 +1,1057 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#1a1a2e" />
-    <meta name="description" content="Thales Cyber Shield - AI-Powered Threat Intelligence & Response System for Indian Digital Infrastructure" />
-    <title>Thales Cyber Shield - Cybersecurity Dashboard</title>
+    <meta name="description" content="Thales Cyber Shield - AI-Powered Cybersecurity Dashboard for Indian Digital Infrastructure" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>" />
+    <title>Thales Cyber Shield - Advanced Threat Intelligence Platform</title>
     
-    <!-- Material-UI Icons -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+    <!-- External Libraries -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     
-    <!-- Custom CSS -->
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      
-      body {
-        font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        background: linear-gradient(135deg, #0f3460 0%, #16213e 50%, #0e1529 100%);
-        color: #ffffff;
-        min-height: 100vh;
-        overflow-x: hidden;
-      }
-      
-      .dashboard-container {
-        min-height: 100vh;
-        padding: 20px;
-      }
-      
-      .header {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 15px;
-        padding: 20px;
-        margin-bottom: 30px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-      }
-      
-      .header-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 10px;
-        background: linear-gradient(45deg, #00d4ff, #090979);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
-      
-      .header-subtitle {
-        font-size: 1.2rem;
-        color: #b0bec5;
-        margin-bottom: 15px;
-      }
-      
-      .status-indicators {
-        display: flex;
-        gap: 20px;
-        flex-wrap: wrap;
-      }
-      
-      .status-indicator {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 16px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
-        font-size: 0.9rem;
-      }
-      
-      .status-indicator.active {
-        background: rgba(76, 175, 80, 0.2);
-        border: 1px solid #4caf50;
-      }
-      
-      .status-indicator.warning {
-        background: rgba(255, 152, 0, 0.2);
-        border: 1px solid #ff9800;
-      }
-      
-      .main-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-      }
-      
-      .card {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 15px;
-        padding: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-      }
-      
-      .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      }
-      
-      .card-title {
-        font-size: 1.3rem;
-        font-weight: 600;
-        margin-bottom: 15px;
-        color: #ffffff;
-      }
-      
-      .metric-value {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 5px;
-      }
-      
-      .metric-label {
-        font-size: 0.9rem;
-        color: #b0bec5;
-      }
-      
-      .threat-list {
-        max-height: 300px;
-        overflow-y: auto;
-      }
-      
-      .threat-item {
-        display: flex;
-        justify-content: between;
-        align-items: center;
-        padding: 12px;
-        margin-bottom: 8px;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 8px;
-        border-left: 4px solid #f44336;
-      }
-      
-      .threat-item.medium {
-        border-left-color: #ff9800;
-      }
-      
-      .threat-item.low {
-        border-left-color: #4caf50;
-      }
-      
-      .threat-info {
-        flex: 1;
-      }
-      
-      .threat-type {
-        font-weight: 600;
-        margin-bottom: 4px;
-      }
-      
-      .threat-desc {
-        font-size: 0.8rem;
-        color: #b0bec5;
-      }
-      
-      .threat-time {
-        font-size: 0.7rem;
-        color: #90a4ae;
-      }
-      
-      .api-status {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 10px;
-      }
-      
-      .status-dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: #4caf50;
-      }
-      
-      .btn {
-        background: linear-gradient(45deg, #2196f3, #21cbf3);
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 25px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        margin: 5px;
-      }
-      
-      .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
-      }
-      
-      .btn.danger {
-        background: linear-gradient(45deg, #f44336, #ff6b6b);
-      }
-      
-      .loading {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 2px solid #f3f3f3;
-        border-radius: 50%;
-        border-top: 2px solid #2196f3;
-        animation: spin 1s linear infinite;
-      }
-      
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-      
-      .india-map {
-        width: 100%;
-        height: 250px;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect width="400" height="400" fill="%23001122"/><text x="200" y="200" text-anchor="middle" fill="%234caf50" font-size="16">India Threat Map</text><circle cx="150" cy="150" r="5" fill="%23f44336"/><circle cx="250" cy="180" r="3" fill="%23ff9800"/><circle cx="200" cy="220" r="4" fill="%23f44336"/></svg>') center/cover;
-        border-radius: 10px;
-      }
-      
-      .scrollbar::-webkit-scrollbar {
-        width: 6px;
-      }
-      
-      .scrollbar::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 3px;
-      }
-      
-      .scrollbar::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 3px;
-      }
+        :root {
+            --primary-bg: #0f1419;
+            --secondary-bg: #1e293b;
+            --accent-bg: #334155;
+            --critical-red: #ef4444;
+            --warning-orange: #f59e0b;
+            --success-green: #10b981;
+            --info-blue: #3b82f6;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #475569;
+            --glow-blue: #0ea5e9;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--primary-bg) 0%, #1a202c 100%);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: var(--secondary-bg);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            animation: pulse 2s infinite;
+        }
+
+        .brand-info h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--glow-blue), var(--text-primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-info p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--info-blue), var(--glow-blue));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--accent-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+            transform: translateY(-1px);
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success-green);
+            border-radius: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success-green);
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .threat-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--secondary-bg);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-action {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .card-action:hover {
+            background: var(--accent-bg);
+            color: var(--text-primary);
+        }
+
+        /* Metric Cards */
+        .metric-card {
+            text-align: center;
+            position: relative;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 1rem 0;
+        }
+
+        .metric-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-change {
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .change-positive { color: var(--success-green); }
+        .change-negative { color: var(--critical-red); }
+
+        /* Threat Feed */
+        .threat-feed {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .threat-item {
+            background: var(--accent-bg);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 0.75rem 0;
+            border-left: 4px solid var(--info-blue);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .threat-item:hover {
+            transform: translateX(5px);
+            background: rgba(239, 68, 68, 0.1);
+            border-left-color: var(--critical-red);
+        }
+
+        .threat-item.critical {
+            border-left-color: var(--critical-red);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .threat-item.high {
+            border-left-color: var(--warning-orange);
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .threat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .threat-type {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .threat-time {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .threat-desc {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .severity-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.75rem;
+            font-size: 0.625rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .severity-critical {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--critical-red);
+        }
+
+        .severity-high {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning-orange);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        /* Interactive Features */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: var(--secondary-bg);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--glow-blue);
+            box-shadow: 0 10px 30px rgba(14, 165, 233, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--glow-blue);
+        }
+
+        .feature-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-desc {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-content {
+            background-color: var(--secondary-bg);
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 600px;
+            border: 1px solid var(--border-color);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .close {
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .close:hover {
+            color: var(--text-primary);
+            background: var(--accent-bg);
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid var(--text-secondary);
+            border-radius: 50%;
+            border-top-color: var(--glow-blue);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .threat-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
     </style>
-  </head>
-  <body>
-    <div id="root">
-      <div class="dashboard-container">
-        <!-- Header -->
-        <div class="header">
-          <h1 class="header-title">🛡️ Thales Cyber Shield</h1>
-          <p class="header-subtitle">AI-Powered Threat Intelligence & Response System for Indian Digital Infrastructure</p>
-          <div class="status-indicators">
-            <div class="status-indicator active">
-              <span class="status-dot"></span>
-              API Connected
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">🛡️</div>
+                <div class="brand-info">
+                    <h1>Thales Cyber Shield</h1>
+                    <p>Advanced Threat Intelligence Platform for India</p>
+                </div>
             </div>
-            <div class="status-indicator active">
-              <span class="status-dot"></span>
-              AI Models Active
+            <div class="header-actions">
+                <div class="status-badge">
+                    <div class="status-dot"></div>
+                    <span>System Online</span>
+                </div>
+                <a href="http://localhost:8000/docs" target="_blank" class="btn btn-primary">
+                    <i class="material-icons">api</i>
+                    API Docs
+                </a>
+                <button class="btn btn-secondary" onclick="showSystemInfo()">
+                    <i class="material-icons">info</i>
+                    System Info
+                </button>
             </div>
-            <div class="status-indicator active">
-              <span class="status-dot"></span>
-              Threat Intel Live
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Key Metrics Dashboard -->
+        <div class="dashboard-grid">
+            <div class="card metric-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--critical-red)"></i>
+                        Critical Threats
+                    </div>
+                    <button class="card-action" onclick="refreshMetrics()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                <div class="metric-value" style="color: var(--critical-red)" id="criticalThreats">24</div>
+                <div class="metric-label">Active High-Priority Threats</div>
+                <div class="metric-change change-negative">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+3 from last hour</span>
+                </div>
             </div>
-            <div class="status-indicator warning">
-              <span class="status-dot" style="background: #ff9800;"></span>
-              3 Active Threats
+
+            <div class="card metric-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-shield-alt" style="color: var(--success-green)"></i>
+                        Detection Rate
+                    </div>
+                </div>
+                <div class="metric-value" style="color: var(--success-green)" id="detectionRate">98.7%</div>
+                <div class="metric-label">AI Model Accuracy</div>
+                <div class="metric-change change-positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+0.3% improvement</span>
+                </div>
             </div>
-          </div>
+
+            <div class="card metric-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-clock" style="color: var(--info-blue)"></i>
+                        Response Time
+                    </div>
+                </div>
+                <div class="metric-value" style="color: var(--info-blue)" id="responseTime">2.3s</div>
+                <div class="metric-label">Average Response Time</div>
+                <div class="metric-change change-positive">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>-0.5s faster</span>
+                </div>
+            </div>
         </div>
 
-        <!-- Main Dashboard Grid -->
-        <div class="main-grid">
-          <!-- Threat Overview -->
-          <div class="card">
-            <h3 class="card-title">🚨 Threat Overview</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-              <div>
-                <div class="metric-value" style="color: #f44336;">24</div>
-                <div class="metric-label">Critical Threats</div>
-              </div>
-              <div>
-                <div class="metric-value" style="color: #ff9800;">156</div>
-                <div class="metric-label">Medium Threats</div>
-              </div>
-              <div>
-                <div class="metric-value" style="color: #4caf50;">892</div>
-                <div class="metric-label">Resolved</div>
-              </div>
-              <div>
-                <div class="metric-value" style="color: #2196f3;">98.7%</div>
-                <div class="metric-label">Detection Rate</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- System Status -->
-          <div class="card">
-            <h3 class="card-title">⚙️ System Status</h3>
-            <div class="api-status">
-              <span class="status-dot"></span>
-              <span>API Health: Operational</span>
-            </div>
-            <div class="api-status">
-              <span class="status-dot"></span>
-              <span>Database: Connected</span>
-            </div>
-            <div class="api-status">
-              <span class="status-dot"></span>
-              <span>ML Models: Loaded</span>
-            </div>
-            <div class="api-status">
-              <span class="status-dot"></span>
-              <span>Threat Intel: Active</span>
-            </div>
-            <button class="btn" onclick="checkApiHealth()">Test API Connection</button>
-            <button class="btn" onclick="window.open('/api/docs', '_blank')">View API Docs</button>
-          </div>
-
-          <!-- Active Threats -->
-          <div class="card">
-            <h3 class="card-title">🔥 Active Threats</h3>
-            <div class="threat-list scrollbar">
-              <div class="threat-item">
-                <div class="threat-info">
-                  <div class="threat-type">APT36 - Transparent Tribe</div>
-                  <div class="threat-desc">Credential harvesting campaign targeting Indian government</div>
-                  <div class="threat-time">2 minutes ago</div>
+        <!-- Threat Intelligence Section -->
+        <div class="threat-section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-broadcast-tower" style="color: var(--info-blue)"></i>
+                        Live Threat Intelligence Feed
+                    </div>
+                    <button class="card-action" onclick="refreshThreats()">
+                        <i class="fas fa-refresh"></i>
+                    </button>
                 </div>
-              </div>
-              <div class="threat-item medium">
-                <div class="threat-info">
-                  <div class="threat-type">SideCopy APT</div>
-                  <div class="threat-desc">Spear-phishing targeting defense contractors</div>
-                  <div class="threat-time">15 minutes ago</div>
+                <div class="threat-feed" id="threatFeed">
+                    <!-- Threats will be populated by JavaScript -->
                 </div>
-              </div>
-              <div class="threat-item">
-                <div class="threat-info">
-                  <div class="threat-type">Ransomware Detection</div>
-                  <div class="threat-desc">Double extortion attempt on banking sector</div>
-                  <div class="threat-time">1 hour ago</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-robot" style="color: var(--warning-orange)"></i>
+                        AI Threat Analysis
+                    </div>
                 </div>
-              </div>
-              <div class="threat-item low">
-                <div class="threat-info">
-                  <div class="threat-type">Anomaly Detected</div>
-                  <div class="threat-desc">Unusual network traffic pattern</div>
-                  <div class="threat-time">2 hours ago</div>
+                <div style="text-align: center; padding: 2rem 0;">
+                    <div class="feature-icon">🤖</div>
+                    <h3 style="margin-bottom: 1rem;">Advanced AI Models Active</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                        Real-time threat detection using PyTorch and Transformers
+                    </p>
+                    <button class="btn btn-primary" onclick="runThreatAnalysis()" style="width: 100%;">
+                        <i class="fas fa-search"></i>
+                        Analyze New Threats
+                    </button>
                 </div>
-              </div>
             </div>
-          </div>
-
-          <!-- India Threat Map -->
-          <div class="card">
-            <h3 class="card-title">🗺️ India Threat Map</h3>
-            <div class="india-map"></div>
-            <div style="margin-top: 10px; font-size: 0.8rem; color: #b0bec5;">
-              Real-time threat visualization across Indian states
-            </div>
-          </div>
-
-          <!-- AI Analytics -->
-          <div class="card">
-            <h3 class="card-title">🤖 AI Analytics</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-              <div>
-                <div class="metric-value" style="color: #9c27b0;">99.2%</div>
-                <div class="metric-label">ML Accuracy</div>
-              </div>
-              <div>
-                <div class="metric-value" style="color: #00bcd4;">0.1%</div>
-                <div class="metric-label">False Positives</div>
-              </div>
-            </div>
-            <div style="margin-top: 15px;">
-              <div style="margin-bottom: 5px;">Threat Detection Models:</div>
-              <div style="font-size: 0.8rem; color: #4caf50;">✓ Random Forest: Active</div>
-              <div style="font-size: 0.8rem; color: #4caf50;">✓ Deep Learning: Active</div>
-              <div style="font-size: 0.8rem; color: #4caf50;">✓ Anomaly Detection: Active</div>
-            </div>
-          </div>
-
-          <!-- Quick Actions -->
-          <div class="card">
-            <h3 class="card-title">⚡ Quick Actions</h3>
-            <button class="btn" onclick="analyzeThreat()">Analyze New Threat</button>
-            <button class="btn" onclick="generateReport()">Generate Report</button>
-            <button class="btn danger" onclick="triggerIncidentResponse()">Incident Response</button>
-            <div style="margin-top: 15px; font-size: 0.8rem; color: #b0bec5;">
-              Emergency Contact: CERT-In Incident Response Team
-            </div>
-          </div>
         </div>
 
-        <!-- Footer -->
-        <div style="text-align: center; padding: 20px; color: #b0bec5; font-size: 0.9rem;">
-          <p>🏆 Built for Thales GenTech India Hackathon 2025 | Protecting India's Digital Future</p>
-          <p>© 2025 Thales Cyber Shield - AI-Powered Cybersecurity Platform</p>
+        <!-- Interactive Features -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-tools" style="color: var(--glow-blue)"></i>
+                    Thales Security Operations Center
+                </div>
+            </div>
+            <div class="feature-grid">
+                <div class="feature-card" onclick="showIncidentResponse()">
+                    <div class="feature-icon">🚨</div>
+                    <div class="feature-title">Incident Response</div>
+                    <div class="feature-desc">Automated incident handling and response workflows</div>
+                </div>
+                <div class="feature-card" onclick="showThreatHunting()">
+                    <div class="feature-icon">🔍</div>
+                    <div class="feature-title">Threat Hunting</div>
+                    <div class="feature-desc">Proactive threat discovery and investigation tools</div>
+                </div>
+                <div class="feature-card" onclick="showVulnManagement()">
+                    <div class="feature-icon">🛡️</div>
+                    <div class="feature-title">Vulnerability Management</div>
+                    <div class="feature-desc">Comprehensive vulnerability assessment and tracking</div>
+                </div>
+                <div class="feature-card" onclick="showComplianceReport()">
+                    <div class="feature-icon">📋</div>
+                    <div class="feature-title">Compliance Reporting</div>
+                    <div class="feature-desc">Automated compliance reports for Indian frameworks</div>
+                </div>
+            </div>
         </div>
-      </div>
+
+        <!-- Analytics Charts -->
+        <div class="charts-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-chart-line" style="color: var(--info-blue)"></i>
+                        Threat Trends (24h)
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="threatTrendsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-chart-pie" style="color: var(--warning-orange)"></i>
+                        Attack Vector Distribution
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="attackVectorChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <div id="systemInfoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🛡️ System Information</h2>
+                <span class="close" onclick="closeModal('systemInfoModal')">&times;</span>
+            </div>
+            <div id="systemInfoContent"></div>
+        </div>
+    </div>
+
+    <div id="threatAnalysisModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔍 Threat Analysis Results</h2>
+                <span class="close" onclick="closeModal('threatAnalysisModal')">&times;</span>
+            </div>
+            <div id="threatAnalysisContent"></div>
+        </div>
+    </div>
+
+    <div id="incidentResponseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🚨 Incident Response Center</h2>
+                <span class="close" onclick="closeModal('incidentResponseModal')">&times;</span>
+            </div>
+            <div id="incidentResponseContent"></div>
+        </div>
     </div>
 
     <script>
-      // JavaScript for Dashboard Functionality
-      async function checkApiHealth() {
-        const button = event.target;
-        button.innerHTML = '<span class="loading"></span> Checking...';
-        button.disabled = true;
-        
-        try {
-          const response = await fetch('/api/health');
-          if (response.ok) {
-            const data = await response.json();
-            button.innerHTML = '✅ API Healthy';
-            button.style.background = 'linear-gradient(45deg, #4caf50, #66bb6a)';
-            setTimeout(() => {
-              button.innerHTML = 'Test API Connection';
-              button.style.background = 'linear-gradient(45deg, #2196f3, #21cbf3)';
-              button.disabled = false;
-            }, 2000);
-          } else {
-            throw new Error('API not responding');
-          }
-        } catch (error) {
-          button.innerHTML = '❌ API Error';
-          button.style.background = 'linear-gradient(45deg, #f44336, #ff6b6b)';
-          setTimeout(() => {
-            button.innerHTML = 'Test API Connection';
-            button.style.background = 'linear-gradient(45deg, #2196f3, #21cbf3)';
-            button.disabled = false;
-          }, 2000);
-        }
-      }
-      
-      function analyzeThreat() {
-        const button = event.target;
-        button.innerHTML = '<span class="loading"></span> Analyzing...';
-        button.disabled = true;
-        
-        setTimeout(() => {
-          alert('🔍 Threat Analysis Complete\\n\\nSample Analysis:\\n- Threat Type: APT Campaign\\n- Risk Level: High\\n- Confidence: 94%\\n- Recommendation: Immediate containment required');
-          button.innerHTML = 'Analyze New Threat';
-          button.disabled = false;
-        }, 2000);
-      }
-      
-      function generateReport() {
-        const button = event.target;
-        button.innerHTML = '<span class="loading"></span> Generating...';
-        button.disabled = true;
-        
-        setTimeout(() => {
-          const report = `📊 THALES CYBER SHIELD SECURITY REPORT
-          
-🕒 Generated: ${new Date().toLocaleString()}
-
-📈 THREAT STATISTICS:
-• Total Threats Detected: 1,072
-• Critical: 24 (2.2%)
-• Medium: 156 (14.6%)
-• Low: 892 (83.2%)
-
-🤖 AI MODEL PERFORMANCE:
-• Detection Accuracy: 99.2%
-• False Positive Rate: 0.1%
-• Processing Speed: <500ms
-
-🇮🇳 INDIA-SPECIFIC THREATS:
-• APT36 Campaigns: 12 detected
-• SideCopy Activities: 8 incidents
-• Banking Sector Attacks: 15 blocked
-
-🛡️ RECOMMENDATIONS:
-1. Increase monitoring on government networks
-2. Update threat signatures for APT36
-3. Enhance email security protocols
-4. Deploy additional ML models for zero-day detection`;
-          
-          const blob = new Blob([report], { type: 'text/plain' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `thales-cyber-shield-report-${new Date().getTime()}.txt`;
-          a.click();
-          URL.revokeObjectURL(url);
-          
-          button.innerHTML = '✅ Report Generated';
-          setTimeout(() => {
-            button.innerHTML = 'Generate Report';
-            button.disabled = false;
-          }, 2000);
-        }, 1500);
-      }
-      
-      function triggerIncidentResponse() {
-        if (confirm('🚨 INCIDENT RESPONSE ACTIVATION\\n\\nThis will trigger emergency protocols and notify CERT-In.\\n\\nContinue?')) {
-          const button = event.target;
-          button.innerHTML = '<span class="loading"></span> Activating...';
-          button.disabled = true;
-          
-          setTimeout(() => {
-            alert('🚨 INCIDENT RESPONSE ACTIVATED\\n\\n✅ CERT-In notified\\n✅ Security team alerted\\n✅ Containment protocols initiated\\n✅ Forensic logging enabled\\n\\nIncident ID: INC-' + Date.now());
-            button.innerHTML = '🚨 Response Active';
-            button.style.background = 'linear-gradient(45deg, #ff9800, #ffb74d)';
-            setTimeout(() => {
-              button.innerHTML = 'Incident Response';
-              button.style.background = 'linear-gradient(45deg, #f44336, #ff6b6b)';
-              button.disabled = false;
-            }, 5000);
-          }, 2000);
-        }
-      }
-      
-      // Auto-refresh threat data every 30 seconds
-      setInterval(() => {
-        const threatItems = document.querySelectorAll('.threat-item');
-        if (threatItems.length > 0) {
-          threatItems.forEach(item => {
-            item.style.opacity = '0.7';
-            setTimeout(() => {
-              item.style.opacity = '1';
-            }, 200);
-          });
-        }
-      }, 30000);
-      
-      // Initialize dashboard
-      document.addEventListener('DOMContentLoaded', function() {
-        console.log('🛡️ Thales Cyber Shield Dashboard Initialized');
-        console.log('🚀 AI-Powered Threat Intelligence System Ready');
-        console.log('🇮🇳 Protecting India\\'s Digital Infrastructure');
-        
-        // Simulate real-time updates
-        let threatCount = 24;
-        setInterval(() => {
-          if (Math.random() > 0.8) {
-            threatCount += Math.random() > 0.5 ? 1 : -1;
-            const threatCountElement = document.querySelector('.metric-value[style*="color: #f44336"]');
-            if (threatCountElement) {
-              threatCountElement.textContent = Math.max(0, threatCount);
+        // Enhanced Thales Cyber Shield Dashboard
+        class ThreatDashboard {
+            constructor() {
+                this.threats = [
+                    {
+                        id: 1,
+                        type: "APT36 - Transparent Tribe",
+                        description: "Advanced spear-phishing campaign targeting Indian government ministries",
+                        severity: "critical",
+                        timestamp: new Date(Date.now() - 5 * 60 * 1000),
+                        confidence: 0.94,
+                        source: "Pakistan"
+                    },
+                    {
+                        id: 2,
+                        type: "SideCopy APT",
+                        description: "Sophisticated phishing targeting Indian defense contractors",
+                        severity: "high",
+                        timestamp: new Date(Date.now() - 18 * 60 * 1000),
+                        confidence: 0.87,
+                        source: "Pakistan"
+                    },
+                    {
+                        id: 3,
+                        type: "Ransomware - Double Extortion",
+                        description: "Advanced ransomware targeting Indian banking infrastructure",
+                        severity: "critical",
+                        timestamp: new Date(Date.now() - 45 * 60 * 1000),
+                        confidence: 0.96,
+                        source: "China"
+                    },
+                    {
+                        id: 4,
+                        type: "IoT Botnet - Mirai Variant",
+                        description: "Large-scale IoT botnet targeting smart city infrastructure",
+                        severity: "high",
+                        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+                        confidence: 0.82,
+                        source: "Russia"
+                    }
+                ];
+                
+                this.init();
             }
-          }
-        }, 10000);
-      });
 
-      // Add CSS for loading animation
-      const style = document.createElement('style');
-      style.textContent = `
-        .loading {
-          display: inline-block;
-          width: 16px;
-          height: 16px;
-          border: 2px solid #f3f3f3;
-          border-radius: 50%;
-          border-top: 2px solid #2196f3;
-          animation: spin 1s linear infinite;
+            init() {
+                this.renderThreats();
+                this.setupCharts();
+                this.startRealTimeUpdates();
+            }
+
+            renderThreats() {
+                const container = document.getElementById('threatFeed');
+                container.innerHTML = this.threats.map(threat => {
+                    const timeAgo = this.getTimeAgo(threat.timestamp);
+                    return `
+                        <div class="threat-item ${threat.severity}" onclick="showThreatDetails(${threat.id})">
+                            <div class="threat-header">
+                                <div class="threat-type">${threat.type}</div>
+                                <span class="severity-badge severity-${threat.severity}">${threat.severity}</span>
+                            </div>
+                            <div class="threat-desc">${threat.description}</div>
+                            <div class="threat-time">
+                                <i class="fas fa-clock"></i> ${timeAgo} | 
+                                <i class="fas fa-crosshairs"></i> ${(threat.confidence * 100).toFixed(1)}% | 
+                                <i class="fas fa-globe"></i> ${threat.source}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            setupCharts() {
+                // Threat Trends Chart
+                const ctx1 = document.getElementById('threatTrendsChart');
+                if (ctx1) {
+                    new Chart(ctx1, {
+                        type: 'line',
+                        data: {
+                            labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                            datasets: [{
+                                label: 'Critical Threats',
+                                data: [12, 19, 15, 25, 22, 24],
+                                borderColor: '#ef4444',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }, {
+                                label: 'High Priority',
+                                data: [65, 59, 80, 81, 76, 85],
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { labels: { color: '#94a3b8' } }
+                            },
+                            scales: {
+                                x: { ticks: { color: '#94a3b8' } },
+                                y: { ticks: { color: '#94a3b8' } }
+                            }
+                        }
+                    });
+                }
+
+                // Attack Vector Chart
+                const ctx2 = document.getElementById('attackVectorChart');
+                if (ctx2) {
+                    new Chart(ctx2, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Phishing', 'Malware', 'DDoS', 'Ransomware', 'APT'],
+                            datasets: [{
+                                data: [35, 25, 15, 15, 10],
+                                backgroundColor: [
+                                    '#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#0ea5e9'
+                                ],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { 
+                                    position: 'bottom',
+                                    labels: { color: '#94a3b8', padding: 15 }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            startRealTimeUpdates() {
+                setInterval(() => {
+                    this.updateMetrics();
+                }, 30000);
+            }
+
+            updateMetrics() {
+                const critical = document.getElementById('criticalThreats');
+                if (critical) {
+                    const currentValue = parseInt(critical.textContent);
+                    const change = Math.floor(Math.random() * 3) - 1;
+                    critical.textContent = Math.max(0, currentValue + change);
+                }
+            }
+
+            getTimeAgo(timestamp) {
+                const now = new Date();
+                const diff = now - timestamp;
+                const minutes = Math.floor(diff / (1000 * 60));
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                
+                if (hours > 0) return `${hours}h ago`;
+                if (minutes > 0) return `${minutes}m ago`;
+                return 'Just now';
+            }
         }
-        
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+
+        // Global Functions
+        function showThreatDetails(threatId) {
+            const threat = dashboard.threats.find(t => t.id === threatId);
+            if (!threat) return;
+            
+            const content = `
+                <div style="line-height: 1.6;">
+                    <h3>🔍 Threat Intelligence Report</h3>
+                    <div style="margin: 1.5rem 0;">
+                        <strong>Threat Type:</strong> ${threat.type}<br>
+                        <strong>Severity:</strong> <span style="color: var(--critical-red)">${threat.severity.toUpperCase()}</span><br>
+                        <strong>Source Region:</strong> ${threat.source}<br>
+                        <strong>Confidence:</strong> ${(threat.confidence * 100).toFixed(1)}%<br>
+                        <strong>Description:</strong> ${threat.description}
+                    </div>
+                    <h4>Recommended Actions:</h4>
+                    <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                        <li>Immediate containment of affected systems</li>
+                        <li>Block source IP ranges and domains</li>
+                        <li>Enhanced monitoring for similar patterns</li>
+                        <li>Update threat intelligence feeds</li>
+                        <li>Notify CERT-In: incident@cert-in.org.in</li>
+                    </ul>
+                </div>
+            `;
+            
+            document.getElementById('threatAnalysisContent').innerHTML = content;
+            document.getElementById('threatAnalysisModal').style.display = 'block';
         }
-      `;
-      document.head.appendChild(style);
+
+        function refreshMetrics() {
+            const btn = event.target;
+            const icon = btn.querySelector('i');
+            icon.style.animation = 'spin 1s linear infinite';
+            
+            setTimeout(() => {
+                icon.style.animation = '';
+                dashboard.updateMetrics();
+            }, 1000);
+        }
+
+        function refreshThreats() {
+            const btn = event.target;
+            const icon = btn.querySelector('i');
+            icon.style.animation = 'spin 1s linear infinite';
+            
+            setTimeout(() => {
+                icon.style.animation = '';
+                dashboard.renderThreats();
+            }, 1000);
+        }
+
+        async function runThreatAnalysis() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="loading"></span> Analyzing...';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/health');
+                let result;
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    result = `
+                        <div style="line-height: 1.6;">
+                            <h3>🤖 AI Threat Analysis Complete</h3>
+                            <div style="margin: 1.5rem 0;">
+                                <strong>API Status:</strong> ${data.status || 'Healthy'}<br>
+                                <strong>Analysis Time:</strong> ${new Date().toLocaleString()}<br>
+                                <strong>Events Processed:</strong> 1,247<br>
+                                <strong>Threats Identified:</strong> 24 critical, 156 high<br>
+                                <strong>ML Confidence:</strong> 99.2%
+                            </div>
+                            <h4>Key Findings:</h4>
+                            <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                                <li>APT activity targeting government sectors increased by 15%</li>
+                                <li>New ransomware variant detected in banking sector</li>
+                                <li>IoT botnet expansion in smart city infrastructure</li>
+                                <li>Phishing campaigns using Indian festival themes</li>
+                            </ul>
+                        </div>
+                    `;
+                } else {
+                    throw new Error('API unavailable');
+                }
+            } catch (error) {
+                result = `
+                    <div style="line-height: 1.6;">
+                        <h3>🤖 AI Threat Analysis (Demo Mode)</h3>
+                        <div style="margin: 1.5rem 0;">
+                            <strong>Status:</strong> Analysis Complete<br>
+                            <strong>Events Processed:</strong> 1,247<br>
+                            <strong>Threats Detected:</strong> 24 critical, 156 high<br>
+                            <strong>ML Accuracy:</strong> 99.2%
+                        </div>
+                        <h4>Recommendations:</h4>
+                        <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                            <li>Increase monitoring for APT36 indicators</li>
+                            <li>Deploy additional DLP controls for sensitive data</li>
+                            <li>Update firewall rules to block identified IoCs</li>
+                            <li>Conduct user awareness training on phishing</li>
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('threatAnalysisContent').innerHTML = result;
+            document.getElementById('threatAnalysisModal').style.display = 'block';
+            
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+
+        function showSystemInfo() {
+            const content = `
+                <div style="line-height: 1.6;">
+                    <h3>System Status</h3>
+                    <div style="margin: 1.5rem 0;">
+                        <strong>Version:</strong> Thales Cyber Shield v2.5.0<br>
+                        <strong>Build:</strong> 2025.10.12.1<br>
+                        <strong>Environment:</strong> Production Ready<br>
+                        <strong>Uptime:</strong> 7 days, 14 hours<br>
+                        <strong>Database:</strong> <span style="color: var(--success-green)">✅ Connected</span><br>
+                        <strong>AI Models:</strong> <span style="color: var(--success-green)">✅ Loaded</span>
+                    </div>
+                    <h4>Deployment Details:</h4>
+                    <div style="margin: 1rem 0;">
+                        <strong>Platform:</strong> Docker/Podman Containers<br>
+                        <strong>Database:</strong> PostgreSQL 13<br>
+                        <strong>Backend:</strong> Python 3.11 + FastAPI<br>
+                        <strong>AI/ML:</strong> PyTorch + Transformers<br>
+                        <strong>Security:</strong> JWT + TLS 1.3
+                    </div>
+                </div>
+            `;
+            document.getElementById('systemInfoContent').innerHTML = content;
+            document.getElementById('systemInfoModal').style.display = 'block';
+        }
+
+        function showIncidentResponse() {
+            const content = `
+                <div style="line-height: 1.6;">
+                    <h3>🚨 Incident Response Procedures</h3>
+                    <div style="margin: 1.5rem 0;">
+                        <h4>Current Active Incidents:</h4>
+                        <div style="background: var(--accent-bg); padding: 1rem; border-radius: 0.5rem; margin: 1rem 0;">
+                            <strong>INC-001:</strong> APT36 Phishing Campaign<br>
+                            <strong>Status:</strong> <span style="color: var(--warning-orange)">In Progress</span><br>
+                            <strong>Assigned:</strong> SOC Team Alpha<br>
+                            <strong>Priority:</strong> High
+                        </div>
+                        <h4>Response Actions:</h4>
+                        <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                            <li>✅ Isolated affected systems</li>
+                            <li>✅ Blocked malicious IP ranges</li>
+                            <li>🔄 Collecting forensic evidence</li>
+                            <li>⏳ Preparing incident report</li>
+                        </ul>
+                        <h4>Escalation Contacts:</h4>
+                        <div style="margin: 1rem 0;">
+                            <strong>CERT-In:</strong> incident@cert-in.org.in<br>
+                            <strong>Emergency:</strong> +91-11-2468-8800<br>
+                            <strong>Internal SOC:</strong> soc@company.com
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('incidentResponseContent').innerHTML = content;
+            document.getElementById('incidentResponseModal').style.display = 'block';
+        }
+
+        function showThreatHunting() {
+            alert('🔍 Threat Hunting Console\\n\\nProactive threat discovery tools:\\n• IOC Analysis Engine\\n• Behavioral Analytics\\n• Network Traffic Analysis\\n• Endpoint Forensics\\n• YARA Rule Engine\\n\\nHunting queries executed: 247\\nSuspicious activities found: 12\\nFalse positives filtered: 156');
+        }
+
+        function showVulnManagement() {
+            alert('🛡️ Vulnerability Management\\n\\nCurrent vulnerability status:\\n• Critical: 3 (immediate attention required)\\n• High: 15 (patch within 48 hours)\\n• Medium: 89 (patch within 30 days)\\n• Low: 234 (patch during maintenance window)\\n\\nNext scan scheduled: Tomorrow 02:00 AM\\nCompliance status: 94% (NIST Framework)');
+        }
+
+        function showComplianceReport() {
+            alert('📋 Compliance Reporting\\n\\nIndia Cybersecurity Framework Compliance:\\n• IT Act 2000: 98% compliant\\n• CERT-In Guidelines: 96% compliant\\n• RBI Cyber Security Framework: 94% compliant\\n• Personal Data Protection Bill: 92% compliant\\n\\nLast audit: September 2025\\nNext audit due: December 2025\\nRecommendations: 7 pending implementations');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Initialize Dashboard
+        let dashboard;
+        document.addEventListener('DOMContentLoaded', function() {
+            dashboard = new ThreatDashboard();
+            console.log('🛡️ Thales Cyber Shield Dashboard Loaded');
+            console.log('🇮🇳 Protecting India Digital Infrastructure');
+        });
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
     </script>
-    <script src="dashboard.js"></script>
-  </body>
+</body>
 </html>

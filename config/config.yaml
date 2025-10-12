@@ -37,10 +37,10 @@ threat_intelligence:
   sources:
     cert_in:
       enabled: true
-      api_key: "your-cert-in-api-key"
+      api_key: "TKvQ61tmuvKOy0QqYaeEm1FzOZxXXU/CqGajawXcOPN7swMDpSMm+9zSnZJOny47"
     virustotal:
       enabled: true
-      api_key: "your-virustotal-api-key"
+      api_key: "a0661f79e94ff701b5990b635527ead194453afa93f29236668c3d3aae2e2f27"
     abuse_ch:
       enabled: true
     internal:
@@ -48,8 +48,8 @@ threat_intelligence:
 
 cloud:
   aws:
-    access_key_id: "your-aws-key"
-    secret_access_key: "your-aws-secret"
+    access_key_id: "ASIAUI3GJKK7M3B4R77P"
+    secret_access_key: "kSGo1dreTqM3jQO2VAeS7ijBO1/P/p8J57ef4qiT"
     region: "ap-south-1"  # Mumbai region for Indian deployment
   azure:
     client_id: "your-azure-client-id"

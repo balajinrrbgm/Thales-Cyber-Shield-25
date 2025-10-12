@@ -1,0 +1,61 @@
+# AWS EKS Fargate Profile for Cost-Optimized Deployment
+# This profile ensures all pods run on Fargate for serverless cost model
+
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: thales-cyber-shield-cluster
+  region: ap-south-1  # Mumbai region for India deployment
+  version: "1.28"
+
+# Minimal node groups for cost optimization
+nodeGroups: []
+
+# Fargate profiles for serverless compute
+fargateProfiles:
+  - name: thales-fargate-profile
+    selectors:
+      - namespace: thales-cyber-shield
+        labels:
+          app: thales-backend
+      - namespace: thales-cyber-shield
+        labels:
+          app: thales-frontend
+      - namespace: thales-cyber-shield
+        labels:
+          app: thales-db
+    subnets:
+      - subnet-xxxxxxxxx  # Private subnet 1
+      - subnet-yyyyyyyyy  # Private subnet 2
+    
+# IAM settings
+iam:
+  withOIDC: true
+  serviceAccounts:
+    - metadata:
+        name: aws-load-balancer-controller
+        namespace: kube-system
+      wellKnownPolicies:
+        awsLoadBalancerController: true
+    - metadata:
+        name: cluster-autoscaler
+        namespace: kube-system
+      wellKnownPolicies:
+        autoScaling: true
+
+# Addons for essential services
+addons:
+  - name: vpc-cni
+    version: latest
+  - name: coredns
+    version: latest
+  - name: kube-proxy
+    version: latest
+  - name: aws-ebs-csi-driver
+    version: latest
+
+# CloudWatch logging (minimal for cost)
+cloudWatch:
+  clusterLogging:
+    enableTypes: ["api", "audit", "authenticator"]
