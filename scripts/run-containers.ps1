@@ -102,7 +102,7 @@ Write-Host "🚀 Starting main application..." -ForegroundColor Yellow
     --name thales-cyber-shield `
     --network thales-network `
     -p 8000:8000 `
-    -e DATABASE_URL=postgresql://thales:thales123@postgres-db:5432/thales_db `
+    -e DATABASE_URL=postgresql+asyncpg://thales:thales123@postgres-db:5432/thales_db `
     -e SECRET_KEY=thales-secret-key-for-hackathon-2025 `
     -e DEBUG=true `
     -e THALES_ENVIRONMENT=demo `
